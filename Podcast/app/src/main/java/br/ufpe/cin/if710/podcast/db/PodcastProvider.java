@@ -2,11 +2,16 @@ package br.ufpe.cin.if710.podcast.db;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
 public class PodcastProvider extends ContentProvider {
-    public PodcastProvider() {
+
+    private PodcastDBHelper dbHelper;
+
+    public PodcastProvider(Context appContext) {
+        dbHelper = PodcastDBHelper.getInstance(appContext);
     }
 
     @Override

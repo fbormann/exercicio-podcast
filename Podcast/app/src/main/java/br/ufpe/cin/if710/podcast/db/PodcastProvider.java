@@ -1,9 +1,11 @@
 package br.ufpe.cin.if710.podcast.db;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
 public class PodcastProvider extends ContentProvider {
@@ -29,8 +31,9 @@ public class PodcastProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        // TODO: Implement this to handle requests to insert a new row.
-        throw new UnsupportedOperationException("Not yet implemented");
+        SQLiteDatabase database = dbHelper.getWritableDatabase();
+        long newRowId = database.insert(dbHelper.getDatabaseName(), null, values);
+        return ContentUris.withAppendedId(PodcastProviderContract.EPISODE_LIST_URI, newRowId);
     }
 
     @Override

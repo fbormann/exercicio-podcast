@@ -12,8 +12,7 @@ public class PodcastProvider extends ContentProvider {
 
     private PodcastDBHelper dbHelper;
 
-    public PodcastProvider(Context appContext) {
-        dbHelper = PodcastDBHelper.getInstance(appContext);
+    public PodcastProvider() {
     }
 
     @Override
@@ -33,13 +32,13 @@ public class PodcastProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         SQLiteDatabase database = dbHelper.getWritableDatabase();
         long newRowId = database.insert(dbHelper.getDatabaseName(), null, values);
-        return ContentUris.withAppendedId(PodcastProviderContract.EPISODE_LIST_URI, newRowId);
+        return ContentUris.withAppendedId(uri, newRowId);
     }
 
     @Override
     public boolean onCreate() {
-        // TODO: Implement this to initialize your content provider on startup.
-        return false;
+        dbHelper = PodcastDBHelper.getInstance(getContext());
+        return true;
     }
 
     @Override

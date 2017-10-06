@@ -1,6 +1,7 @@
 package br.ufpe.cin.if710.podcast.ui;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import java.util.List;
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastProvider;
+import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
 import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
@@ -43,7 +45,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         items = (ListView) findViewById(R.id.items);
-        provider = new PodcastProvider(getApplicationContext());
+        provider = new PodcastProvider();
     }
 
     @Override
@@ -96,7 +98,16 @@ public class MainActivity extends Activity {
             } catch (XmlPullParserException e) {
                 e.printStackTrace();
             }
-
+            for (int i = 0; i < itemList.size(); i++) {
+                ContentValues values = new ContentValues();
+                values.put(PodcastDBHelper.columns[1], itemList.get(i).getTitle());
+                values.put(PodcastDBHelper.columns[2], itemList.get(i).getPubDate());
+                values.put(PodcastDBHelper.columns[3], itemList.get(i).getLink());
+                values.put(PodcastDBHelper.columns[4], itemList.get(i).getDescription());
+                values.put(PodcastDBHelper.columns[5], itemList.get(i).getDownloadLink());
+                values.put(PodcastDBHelper.columns[6], "");
+                provider.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
+            }
             return itemList;
         }
 

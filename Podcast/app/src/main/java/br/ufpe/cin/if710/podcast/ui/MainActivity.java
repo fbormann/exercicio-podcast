@@ -1,6 +1,7 @@
 package br.ufpe.cin.if710.podcast.ui;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -37,7 +38,6 @@ public class MainActivity extends Activity {
     //TODO teste com outros links de podcast
 
     private ListView items;
-    private PodcastProvider provider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +45,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         items = (ListView) findViewById(R.id.items);
-        provider = new PodcastProvider();
     }
 
     @Override
@@ -98,6 +97,7 @@ public class MainActivity extends Activity {
             } catch (XmlPullParserException e) {
                 e.printStackTrace();
             }
+            ContentResolver resolver = getContentResolver();
             for (int i = 0; i < itemList.size(); i++) {
                 ContentValues values = new ContentValues();
                 values.put(PodcastDBHelper.columns[1], itemList.get(i).getTitle());
@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
                 values.put(PodcastDBHelper.columns[4], itemList.get(i).getDescription());
                 values.put(PodcastDBHelper.columns[5], itemList.get(i).getDownloadLink());
                 values.put(PodcastDBHelper.columns[6], "");
-                provider.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
+                resolver.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
             }
             return itemList;
         }

@@ -30,8 +30,11 @@ public class PodcastProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        SQLiteDatabase database = dbHelper.getWritableDatabase();
-        long newRowId = database.insert(dbHelper.getDatabaseName(), null, values);
+        long newRowId = (long) 0.0;
+        if (uri.equals(PodcastProviderContract.EPISODE_LIST_URI)) {
+            SQLiteDatabase database = dbHelper.getWritableDatabase();
+            newRowId = database.insert(dbHelper.getDatabaseName(), null, values);
+        }
         return ContentUris.withAppendedId(uri, newRowId);
     }
 

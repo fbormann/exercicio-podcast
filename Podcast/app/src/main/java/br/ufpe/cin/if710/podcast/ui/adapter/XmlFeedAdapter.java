@@ -2,6 +2,7 @@ package br.ufpe.cin.if710.podcast.ui.adapter;
 
 import java.util.List;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -9,14 +10,17 @@ import android.widget.TextView;
 
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
+import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 
 public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
 
     int linkResource;
+    private Context context;
 
     public XmlFeedAdapter(Context context, int resource, List<ItemFeed> objects) {
         super(context, resource, objects);
         linkResource = resource;
+        this.context = context;
     }
 
     /**
@@ -52,7 +56,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
             convertView = View.inflate(getContext(), linkResource, null);
@@ -65,6 +69,19 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
         }
         holder.item_title.setText(getItem(position).getTitle());
         holder.item_date.setText(getItem(position).getPubDate());
+
+        holder.item_title.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent openDetails = new Intent(context, EpisodeDetailActivity.class);
+                openDetails.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                openDetails.putExtra("feed_title", getItem(position).getTitle());
+                openDetails.putExtra("feed_date", getItem(position).getPubDate());
+                openDetails.putExtra("feed_download_link", getItem(position).getDownloadLink());
+                openDetails.putExtra("feed_description", getItem(position).getDescription());
+                context.startActivity(openDetails);
+            }
+        });
         return convertView;
     }
 }

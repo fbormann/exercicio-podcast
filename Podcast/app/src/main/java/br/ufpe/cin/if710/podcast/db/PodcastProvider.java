@@ -33,7 +33,7 @@ public class PodcastProvider extends ContentProvider {
         long newRowId = (long) 0.0;
         if (uri.equals(PodcastProviderContract.EPISODE_LIST_URI)) {
             SQLiteDatabase database = dbHelper.getWritableDatabase();
-            newRowId = database.insert(dbHelper.getDatabaseName(), null, values);
+            newRowId = database.insert(dbHelper.DATABASE_TABLE, null, values);
         }
         return ContentUris.withAppendedId(uri, newRowId);
     }
@@ -47,8 +47,6 @@ public class PodcastProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        // TODO: Implement this to handle query requests from clients.
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

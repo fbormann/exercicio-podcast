@@ -40,8 +40,7 @@ public class MainActivity extends Activity {
 
     //ao fazer envio da resolucao, use este link no seu codigo!
     private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
-    //TODO teste com outros links de podcast
-
+    private ReceiverRSSData receiver;
     private ListView items;
     private List<ItemFeed> feedItems;
     private XmlFeedAdapter adapter;
@@ -85,7 +84,7 @@ public class MainActivity extends Activity {
     protected void onStart() {
         super.onStart();
         //new DownloadXmlTask().execute(RSS_FEED);
-        ReceiverRSSData receiver = new ReceiverRSSData();
+        receiver = new ReceiverRSSData();
         IntentFilter filter = new IntentFilter("br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS");
         registerReceiver(receiver, filter);
         new RSSPullService().startActionDownloadRSS(getApplicationContext(), RSS_FEED);
@@ -96,6 +95,7 @@ public class MainActivity extends Activity {
         super.onStop();
         XmlFeedAdapter adapter = (XmlFeedAdapter) items.getAdapter();
         adapter.clear();
+        unregisterReceiver(receiver);
     }
 
 

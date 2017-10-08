@@ -8,6 +8,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import java.util.List;
+
+import br.ufpe.cin.if710.podcast.domain.ItemFeed;
+
 public class PodcastProvider extends ContentProvider {
 
     private PodcastDBHelper dbHelper;
@@ -33,7 +37,7 @@ public class PodcastProvider extends ContentProvider {
         long newRowId = (long) 0.0;
         if (uri.equals(PodcastProviderContract.EPISODE_LIST_URI)) {
             SQLiteDatabase database = dbHelper.getWritableDatabase();
-            newRowId = database.insert(dbHelper.DATABASE_TABLE, null, values);
+            newRowId = database.insert(PodcastDBHelper.DATABASE_TABLE, null, values);
         }
         return ContentUris.withAppendedId(uri, newRowId);
     }
@@ -47,6 +51,18 @@ public class PodcastProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
+        Cursor cursor = null;
+        if (true) { //TODO: remove this true
+            cursor = dbHelper.getReadableDatabase().query(
+                    dbHelper.DATABASE_TABLE,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null, null,
+                    sortOrder
+            );
+        }
+        return cursor;
     }
 
     @Override

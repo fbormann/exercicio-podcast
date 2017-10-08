@@ -80,7 +80,6 @@ public class XmlFeedParser {
                 description = readData(parser, "description");
             }
             else if (name.equals("enclosure")) {
-                //TODO implementar resto do metodo para pegar atributo url da tag enclosure
                 downloadLink = readEnclosure(parser);
                 skip(parser);
             }

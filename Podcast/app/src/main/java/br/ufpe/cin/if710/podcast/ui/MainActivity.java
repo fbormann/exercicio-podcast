@@ -130,8 +130,9 @@ public class MainActivity extends Activity {
             List<ItemFeed> items = new ArrayList<ItemFeed>();
             if (cursor.moveToFirst()) {
                 do {
-                    ItemFeed item = new ItemFeed(cursor.getString(1), null, cursor.getString(2),
-                            cursor.getString(4), null);
+                    ItemFeed item = new ItemFeed(cursor.getString(1), cursor.getString(3), cursor.getString(2),
+                            cursor.getString(4), cursor.getString(5));
+                    item.setId(cursor.getInt(0));
                     items.add(item);
                 } while (cursor.moveToNext());
             }

@@ -1,11 +1,21 @@
 package br.ufpe.cin.if710.podcast.ui.adapter;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import br.ufpe.cin.if710.podcast.R;
@@ -53,6 +63,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
     static class ViewHolder {
         TextView item_title;
         TextView item_date;
+        Button downloadButton;
     }
 
     @Override
@@ -63,6 +74,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             holder = new ViewHolder();
             holder.item_title = (TextView) convertView.findViewById(R.id.item_title);
             holder.item_date = (TextView) convertView.findViewById(R.id.item_date);
+            holder.downloadButton = (Button) convertView.findViewById(R.id.item_action);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -82,6 +94,80 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                 context.startActivity(openDetails);
             }
         });
+
+        holder.downloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new DownloadEpisodeTask()
+                        .execute(getItem(position).getDownloadLink(),
+                                String.valueOf(getItem(position).getId()));
+            }
+        });
         return convertView;
+    }
+
+    private class DownloadEpisodeTask extends AsyncTask<String, Integer, String> {
+
+        @Override
+        protected String doInBackground(String... objects) {
+            InputStream input = null;
+            FileOutputStream output = null;
+            HttpURLConnection connection = null;
+            //build path to where it will save the file
+            String path = "podcast_"+objects[1]; //concatanate with Id
+
+            try {
+                URL url = new URL(objects[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                // expect HTTP 200 OK, so we don't mistakenly save error report
+                // instead of the file
+                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    return "Server returned HTTP " + connection.getResponseCode()
+                            + " " + connection.getResponseMessage();
+                }
+
+                int fileLength = connection.getContentLength();
+
+                // download the file
+                input = connection.getInputStream();
+                File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), path);
+                output = new FileOutputStream(file);
+                byte data[] = new byte[4096];
+                long total = 0;
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    // allow canceling with back button
+                    if (isCancelled()) {
+                        input.close();
+                        return null;
+                    }
+                    total += count;
+                    // publishing the progress....
+                    if (fileLength > 0) // only if total length is known
+                        publishProgress((int) (total * 100 / fileLength));
+                    output.write(data, 0, count);
+                }
+            } catch (Exception e) {
+                return e.toString();
+            } finally {
+                try {
+                    if (output != null)
+                        output.close();
+                    if (input != null)
+                        input.close();
+                } catch (IOException ignored) {
+                }
+
+                if (connection != null)
+                    connection.disconnect();
+            }
+            return path;
+        }
+
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+        }
     }
 }

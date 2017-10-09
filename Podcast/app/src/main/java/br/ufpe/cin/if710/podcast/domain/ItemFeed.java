@@ -6,7 +6,7 @@ public class ItemFeed {
     private final String pubDate;
     private final String description;
     private final String downloadLink;
-
+    private int id;
 
     public ItemFeed(String title, String link, String pubDate, String description, String downloadLink) {
         this.title = title;
@@ -14,6 +14,10 @@ public class ItemFeed {
         this.pubDate = pubDate;
         this.description = description;
         this.downloadLink = downloadLink;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -34,6 +38,10 @@ public class ItemFeed {
 
     public String getDownloadLink() {
         return downloadLink;
+    }
+
+    public int getId() {
+        return this.id;
     }
 
     @Override

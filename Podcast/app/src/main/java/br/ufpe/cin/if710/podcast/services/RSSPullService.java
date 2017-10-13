@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
+import br.ufpe.cin.if710.podcast.db.PodcastProvider;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
@@ -81,7 +82,9 @@ public class RSSPullService extends IntentService {
             values.put(PodcastDBHelper.columns[4], itemList.get(i).getDescription());
             values.put(PodcastDBHelper.columns[5], itemList.get(i).getDownloadLink());
             values.put(PodcastDBHelper.columns[6], "");
-            resolver.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
+            if (resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values, null, null) != 0) {
+                resolver.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
+            }
         }
 
         Intent localIntent = new Intent(Download_RSS);

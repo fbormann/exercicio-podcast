@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -19,6 +21,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import br.ufpe.cin.if710.podcast.R;
+import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
+import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 
@@ -63,7 +67,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
     static class ViewHolder {
         TextView item_title;
         TextView item_date;
-        Button downloadButton;
+        Button actionButton;
     }
 
     @Override
@@ -74,7 +78,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             holder = new ViewHolder();
             holder.item_title = (TextView) convertView.findViewById(R.id.item_title);
             holder.item_date = (TextView) convertView.findViewById(R.id.item_date);
-            holder.downloadButton = (Button) convertView.findViewById(R.id.item_action);
+            holder.actionButton = (Button) convertView.findViewById(R.id.item_action);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -95,27 +99,53 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             }
         });
 
-        holder.downloadButton.setOnClickListener(new View.OnClickListener() {
+        if (!getItem(position).getFileUri().equals("")) {
+            holder.actionButton.setText("tocar");
+        }
+
+        holder.actionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new DownloadEpisodeTask()
-                        .execute(getItem(position).getDownloadLink(),
-                                String.valueOf(getItem(position).getId()));
+                Button btn = (Button) view;
+                if (btn.getText().equals("baixar")) {
+                    new DownloadEpisodeTask()
+                            .execute(getItem(position).getDownloadLink(),
+                                    String.valueOf(getItem(position).getId()));
+                    btn.setText("tocar");
+                    notifyDataSetChanged();
+                } else {
+                    //play podcast
+                }
             }
         });
         return convertView;
     }
 
-    private class DownloadEpisodeTask extends AsyncTask<String, Integer, String> {
+    private class DownloadInfo {
+        public String downloadPath;
+        public int id;
+        public String errorMessage;
+
+        public DownloadInfo(String downloadPath, int id) {
+            this.downloadPath = downloadPath;
+            this.id = id;
+        }
+
+        public DownloadInfo(String errorMessage) {
+            this.errorMessage = errorMessage;
+        }
+    }
+
+    private class DownloadEpisodeTask extends AsyncTask<String, Integer, DownloadInfo> {
 
         @Override
-        protected String doInBackground(String... objects) {
+        protected DownloadInfo doInBackground(String... objects) {
             InputStream input = null;
             FileOutputStream output = null;
             HttpURLConnection connection = null;
             //build path to where it will save the file
-            String path = "podcast_"+objects[1]; //concatanate with Id
-
+            String fileName = "podcast_"+objects[1]; //concatanate with Id
+            String path = "";
             try {
                 URL url = new URL(objects[0]);
                 connection = (HttpURLConnection) url.openConnection();
@@ -124,16 +154,17 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                 // expect HTTP 200 OK, so we don't mistakenly save error report
                 // instead of the file
                 if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                    return "Server returned HTTP " + connection.getResponseCode()
-                            + " " + connection.getResponseMessage();
+                    return new DownloadInfo("Server returned HTTP " + connection.getResponseCode()
+                            + " " + connection.getResponseMessage());
                 }
 
                 int fileLength = connection.getContentLength();
 
                 // download the file
                 input = connection.getInputStream();
-                File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), path);
+                File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PODCASTS), fileName);
                 output = new FileOutputStream(file);
+                path = file.getPath();
                 byte data[] = new byte[4096];
                 long total = 0;
                 int count;
@@ -150,7 +181,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                     output.write(data, 0, count);
                 }
             } catch (Exception e) {
-                return e.toString();
+                return new DownloadInfo(e.toString());
             } finally {
                 try {
                     if (output != null)
@@ -163,11 +194,17 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                 if (connection != null)
                     connection.disconnect();
             }
-            return path;
+            return new DownloadInfo(path, Integer.parseInt(objects[1]));
         }
 
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(DownloadInfo result) {
             super.onPostExecute(result);
+            ContentResolver resolver = context.getContentResolver();
+            ContentValues values = new ContentValues();
+            values.put(PodcastDBHelper.columns[0], result.id);
+            values.put(PodcastDBHelper.columns[6], result.downloadPath);
+            int modified = resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values, null, null);
+            System.out.println(modified);
         }
     }
 }

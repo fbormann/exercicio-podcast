@@ -24,12 +24,14 @@ import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
+import br.ufpe.cin.if710.podcast.services.MediaPlayerService;
 import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 
 public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
 
     int linkResource;
     private Context context;
+    private static final String ACTION_PLAY = "br.ufpe.cin.if701.podcast.action.PLAY";
 
     public XmlFeedAdapter(Context context, int resource, List<ItemFeed> objects) {
         super(context, resource, objects);
@@ -114,7 +116,10 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                     btn.setText("tocar");
                     notifyDataSetChanged();
                 } else {
-                    //play podcast
+                    Intent intent = new Intent(context, MediaPlayerService.class);
+                    intent.setAction(ACTION_PLAY);
+                    intent.putExtra("file_uri", getItem(position).getFileUri());
+                    context.startService(intent);
                 }
             }
         });
@@ -205,7 +210,6 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             values.put(PodcastDBHelper.columns[6], result.downloadPath);
             int modified = resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values,
                     PodcastDBHelper._ID+"=?", new String[]{String.valueOf(result.id)});
-            System.out.println(modified);
         }
     }
 }

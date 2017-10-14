@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -44,6 +46,8 @@ public class MainActivity extends Activity {
     private ListView items;
     private List<ItemFeed> feedItems;
     private XmlFeedAdapter adapter;
+    private static final String Download_RSS = "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,7 +91,15 @@ public class MainActivity extends Activity {
         receiver = new ReceiverRSSData();
         IntentFilter filter = new IntentFilter("br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS");
         registerReceiver(receiver, filter);
-        new RSSPullService().startActionDownloadRSS(getApplicationContext(), RSS_FEED);
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            new RSSPullService().startActionDownloadRSS(getApplicationContext(), RSS_FEED);
+        } else {
+            Intent localIntent = new Intent(Download_RSS);
+            sendBroadcast(localIntent);
+        }
     }
 
     @Override
@@ -118,12 +130,14 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            ContentResolver resolver = context.getContentResolver();
-            Cursor cursor = resolver.query(PodcastProviderContract.EPISODE_LIST_URI, PodcastDBHelper.columns,
-                    null, null, null);
-            List<ItemFeed> items = readFromCursor(cursor);
-            cursor.close();
-            updateListView(items);
+            if (intent.getAction() == Download_RSS) {
+                ContentResolver resolver = context.getContentResolver();
+                Cursor cursor = resolver.query(PodcastProviderContract.EPISODE_LIST_URI, PodcastDBHelper.columns,
+                        null, null, null);
+                List<ItemFeed> items = readFromCursor(cursor);
+                cursor.close();
+                updateListView(items);
+            }
         }
 
         private List<ItemFeed> readFromCursor(Cursor cursor) {

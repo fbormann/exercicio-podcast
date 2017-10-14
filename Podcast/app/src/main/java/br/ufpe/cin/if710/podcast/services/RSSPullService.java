@@ -76,13 +76,15 @@ public class RSSPullService extends IntentService {
         ContentResolver resolver = getContentResolver();
         for (int i = 0; i < itemList.size(); i++) {
             ContentValues values = new ContentValues();
-            values.put(PodcastDBHelper.columns[1], itemList.get(i).getTitle());
-            values.put(PodcastDBHelper.columns[2], itemList.get(i).getPubDate());
-            values.put(PodcastDBHelper.columns[3], itemList.get(i).getLink());
-            values.put(PodcastDBHelper.columns[4], itemList.get(i).getDescription());
-            values.put(PodcastDBHelper.columns[5], itemList.get(i).getDownloadLink());
+            ItemFeed item = itemList.get(i);
+            values.put(PodcastDBHelper.columns[1], item.getTitle());
+            values.put(PodcastDBHelper.columns[2], item.getPubDate());
+            values.put(PodcastDBHelper.columns[3], item.getLink());
+            values.put(PodcastDBHelper.columns[4], item.getDescription());
+            values.put(PodcastDBHelper.columns[5], item.getDownloadLink());
             values.put(PodcastDBHelper.columns[6], "");
-            if (resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values, null, null) == 0) {
+            if (resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values,
+                    PodcastDBHelper.EPISODE_DOWNLOAD_LINK+"=?", new String[]{item.getDownloadLink()}) == 0) {
                 resolver.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
             }
         }

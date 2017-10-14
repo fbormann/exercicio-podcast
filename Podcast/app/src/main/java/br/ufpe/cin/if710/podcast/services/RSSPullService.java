@@ -82,7 +82,7 @@ public class RSSPullService extends IntentService {
             values.put(PodcastDBHelper.columns[4], itemList.get(i).getDescription());
             values.put(PodcastDBHelper.columns[5], itemList.get(i).getDownloadLink());
             values.put(PodcastDBHelper.columns[6], "");
-            if (resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values, null, null) != 0) {
+            if (resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values, null, null) == 0) {
                 resolver.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
             }
         }

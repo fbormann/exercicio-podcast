@@ -7,6 +7,7 @@ public class ItemFeed {
     private final String description;
     private final String downloadLink;
     private int id;
+    private String fileUri;
 
     public ItemFeed(String title, String link, String pubDate, String description, String downloadLink) {
         this.title = title;
@@ -18,6 +19,10 @@ public class ItemFeed {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setFileUri(String fileUri) {
+        this.fileUri = fileUri;
     }
 
     public String getTitle() {
@@ -42,6 +47,10 @@ public class ItemFeed {
 
     public int getId() {
         return this.id;
+    }
+
+    public String getFileUri() {
+        return this.fileUri;
     }
 
     @Override

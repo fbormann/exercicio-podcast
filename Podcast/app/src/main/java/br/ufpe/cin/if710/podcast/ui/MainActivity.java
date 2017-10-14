@@ -147,6 +147,7 @@ public class MainActivity extends Activity {
                     ItemFeed item = new ItemFeed(cursor.getString(1), cursor.getString(3), cursor.getString(2),
                             cursor.getString(4), cursor.getString(5));
                     item.setId(cursor.getInt(0));
+                    item.setFileUri(cursor.getString(6));
                     items.add(item);
                 } while (cursor.moveToNext());
             }

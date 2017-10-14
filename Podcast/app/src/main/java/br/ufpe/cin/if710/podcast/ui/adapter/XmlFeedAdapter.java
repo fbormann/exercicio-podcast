@@ -203,7 +203,8 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             ContentValues values = new ContentValues();
             values.put(PodcastDBHelper.columns[0], result.id);
             values.put(PodcastDBHelper.columns[6], result.downloadPath);
-            int modified = resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values, null, null);
+            int modified = resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values,
+                    PodcastDBHelper._ID+"=?", new String[]{String.valueOf(result.id)});
             System.out.println(modified);
         }
     }

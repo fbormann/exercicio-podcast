@@ -14,8 +14,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,12 +28,14 @@ import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.services.MediaPlayerService;
 import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
+import br.ufpe.cin.if710.podcast.ui.MainActivity;
 
 public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
 
     int linkResource;
     private Context context;
     private static final String ACTION_PLAY = "br.ufpe.cin.if701.podcast.action.PLAY";
+    private static final String ACTION_PAUSE = "br.ufpe.cin.if701.podcast.action.PAUSE";
 
     public XmlFeedAdapter(Context context, int resource, List<ItemFeed> objects) {
         super(context, resource, objects);
@@ -39,6 +43,14 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
         this.context = context;
     }
 
+    public void updateItem(int position, String fileUri) {
+        getItem(position).setFileUri(fileUri);
+        notifyDataSetChanged();
+    }
+
+    public XmlFeedAdapter getReference() {
+        return this;
+    }
     /**
      * public abstract View getView (int position, View convertView, ViewGroup parent)
      * <p>
@@ -70,10 +82,6 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
         TextView item_title;
         TextView item_date;
         Button actionButton;
-    }
-
-    public XmlFeedAdapter getReference() {
-        return this;
     }
 
     @Override
@@ -113,27 +121,41 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             @Override
             public void onClick(View view) {
                 Button btn = (Button) view;
-                if (btn.getText().equals("baixar")) {
-                    new DownloadEpisodeTask(getReference(), position)
-                            .execute(getItem(position).getDownloadLink(),
-                                    String.valueOf(getItem(position).getId()));
-                    btn.setText("tocar");
-                    notifyDataSetChanged();
-                } else {
-                    Intent intent = new Intent(context, MediaPlayerService.class);
-                    intent.setAction(ACTION_PLAY);
-                    intent.putExtra("file_uri", getItem(position).getFileUri());
-                    context.startService(intent);
+                Intent intent;
+                switch (btn.getText().toString()) {
+                    case "baixar":
+                        new DownloadEpisodeTask(getReference(), position)
+                                .execute(getItem(position).getDownloadLink(),
+                                        String.valueOf(getItem(position).getId()));
+                        btn.setText("tocar");
+                        notifyDataSetChanged();
+                        break;
+
+                    case "tocar":
+                        btn.setText("parar");
+
+                        intent = new Intent(context, MediaPlayerService.class);
+                        intent.setAction(ACTION_PLAY);
+                        intent.putExtra("file_uri", getItem(position).getFileUri());
+                        if (MainActivity.mediaPlayerState == "null") {
+
+                        }
+                        context.startService(intent);
+                        break;
+
+                    case "parar":
+                        btn.setText("tocar");
+                        intent = new Intent(context, MediaPlayerService.class);
+                        intent.setAction(ACTION_PAUSE);
+                        context.startService(intent);
+                        break;
                 }
             }
         });
         return convertView;
     }
 
-    public void updateItem(int position, String fileUri) {
-        getItem(position).setFileUri(fileUri);
-        notifyDataSetChanged();
-    }
+
 
     private class DownloadInfo {
         public String downloadPath;

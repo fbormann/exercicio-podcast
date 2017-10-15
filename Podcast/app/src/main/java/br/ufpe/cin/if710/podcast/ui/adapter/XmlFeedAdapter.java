@@ -27,6 +27,7 @@ import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.services.MediaPlayerService;
+import br.ufpe.cin.if710.podcast.services.RSSPullService;
 import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 import br.ufpe.cin.if710.podcast.ui.MainActivity;
 
@@ -124,8 +125,11 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                 Intent intent;
                 switch (btn.getText().toString()) {
                     case "baixar":
-                        new DownloadEpisodeTask(getReference(), position)
+                        /*new DownloadEpisodeTask(getReference(), position)
                                 .execute(getItem(position).getDownloadLink(),
+                                        String.valueOf(getItem(position).getId()));*/
+                        new RSSPullService()
+                                .startActionDownloadEpisode(context, getItem(position).getDownloadLink(),
                                         String.valueOf(getItem(position).getId()));
                         btn.setText("tocar");
                         notifyDataSetChanged();

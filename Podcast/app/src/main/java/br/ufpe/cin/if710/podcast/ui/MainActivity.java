@@ -46,6 +46,10 @@ public class MainActivity extends Activity {
     private ListView items;
     private List<ItemFeed> feedItems;
     private XmlFeedAdapter adapter;
+    private static final String Download_RSS_FINISHED =
+            "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS_FINISHED";
+    private static final String Download_EPISODE_FINISHED =
+            "br.ufpe.cin.if710.podcast.services.action.Download_EPISODE_FINISHED";
     private static final String Download_RSS = "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS";
     boolean started = false;
 
@@ -94,6 +98,8 @@ public class MainActivity extends Activity {
 
         receiver = new ReceiverRSSData();
         IntentFilter filter = new IntentFilter("br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS");
+        filter.addAction(Download_EPISODE_FINISHED);
+        filter.addAction(Download_RSS_FINISHED);
         registerReceiver(receiver, filter);
 
         if (!started) {
@@ -110,7 +116,7 @@ public class MainActivity extends Activity {
             }
         } else {
             //if there isn't, just download the data from database
-            Intent localIntent = new Intent(Download_RSS);
+            Intent localIntent = new Intent(Download_RSS_FINISHED);
             sendBroadcast(localIntent);
         }
 
@@ -140,19 +146,46 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void updateListView(final String id, final String downloadPath) {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int idInt = Integer.valueOf(id);
+                for (ItemFeed u : feedItems) {
+                    if (u.getId() == idInt) {
+                        u.setFileUri(downloadPath);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
     public class ReceiverRSSData extends BroadcastReceiver {
 
         public ReceiverRSSData() {}
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() == Download_RSS) {
+            if (intent.getAction().equals(Download_RSS_FINISHED)) {
                 ContentResolver resolver = context.getContentResolver();
                 Cursor cursor = resolver.query(PodcastProviderContract.EPISODE_LIST_URI, PodcastDBHelper.columns,
                         null, null, null);
                 List<ItemFeed> items = readFromCursor(cursor);
                 cursor.close();
                 updateListView(items);
+            }
+
+            if (intent.getAction().equals(Download_EPISODE_FINISHED)) {
+                String downloadPath = intent.getStringExtra("downloadPath");
+                String id = intent.getStringExtra("id");
+
+                //update adapter/listView
+                updateListView(id, downloadPath);
+
+                //create notification push that download is finished
+                //update list of items with new fileUri
+
             }
         }
 

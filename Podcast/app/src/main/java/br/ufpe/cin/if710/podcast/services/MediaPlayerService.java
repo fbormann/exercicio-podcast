@@ -39,11 +39,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
                     player.start();
                 } else {
                     try {
+                        player = new StatefulMediaPlayer();
+                        player.setAudioAttributes(new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_MEDIA)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
                         player.setDataSource(this, myUri);
                         player.setOnPreparedListener(this);
                         player.prepareAsync();
                     } catch (Exception e) {
-                        //none;
+                        String message = e.getMessage();
+                        player.release();
                     }
                 }
 
@@ -58,7 +63,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
                     player.setOnPreparedListener(this);
                     player.prepareAsync();
                 } catch (Exception e) {
-                    //none;
+                    String message = e.getMessage();
                 }
             }
         }

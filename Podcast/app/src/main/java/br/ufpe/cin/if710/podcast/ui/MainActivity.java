@@ -87,16 +87,17 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        //new DownloadXmlTask().execute(RSS_FEED);
         receiver = new ReceiverRSSData();
         IntentFilter filter = new IntentFilter("br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS");
         registerReceiver(receiver, filter);
+        //check if there is internet connection available
         ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             new RSSPullService().startActionDownloadRSS(getApplicationContext(), RSS_FEED);
         } else {
+            //if there isn't, just download the data from database
             Intent localIntent = new Intent(Download_RSS);
             sendBroadcast(localIntent);
         }
@@ -108,6 +109,7 @@ public class MainActivity extends Activity {
         XmlFeedAdapter adapter = (XmlFeedAdapter) items.getAdapter();
         adapter.clear();
         unregisterReceiver(receiver);
+
     }
 
 

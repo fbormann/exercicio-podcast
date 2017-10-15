@@ -72,6 +72,10 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
         Button actionButton;
     }
 
+    public XmlFeedAdapter getReference() {
+        return this;
+    }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -110,7 +114,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             public void onClick(View view) {
                 Button btn = (Button) view;
                 if (btn.getText().equals("baixar")) {
-                    new DownloadEpisodeTask()
+                    new DownloadEpisodeTask(getReference(), position)
                             .execute(getItem(position).getDownloadLink(),
                                     String.valueOf(getItem(position).getId()));
                     btn.setText("tocar");
@@ -124,6 +128,11 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             }
         });
         return convertView;
+    }
+
+    public void updateItem(int position, String fileUri) {
+        getItem(position).setFileUri(fileUri);
+        notifyDataSetChanged();
     }
 
     private class DownloadInfo {
@@ -142,6 +151,14 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
     }
 
     private class DownloadEpisodeTask extends AsyncTask<String, Integer, DownloadInfo> {
+
+        private XmlFeedAdapter adapter;
+        private int position;
+
+        public DownloadEpisodeTask(XmlFeedAdapter adapter, int position) {
+            this.adapter = adapter;
+            this.position = position;
+        }
 
         @Override
         protected DownloadInfo doInBackground(String... objects) {
@@ -210,6 +227,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             values.put(PodcastDBHelper.columns[6], result.downloadPath);
             int modified = resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values,
                     PodcastDBHelper._ID+"=?", new String[]{String.valueOf(result.id)});
+            adapter.updateItem(position, result.downloadPath);
         }
     }
 }

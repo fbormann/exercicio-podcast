@@ -32,8 +32,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
             String uri = intent.getStringExtra("file_uri");
             Uri myUri = Uri.parse(uri);
-            player.setOnPreparedListener(this);
-            player.prepareAsync();
+            try {
+                player.setDataSource(this, myUri);
+                player.setOnPreparedListener(this);
+                player.prepareAsync();
+            } catch (Exception e) {
+                //none;
+            }
+
         }
 
         return START_NOT_STICKY;

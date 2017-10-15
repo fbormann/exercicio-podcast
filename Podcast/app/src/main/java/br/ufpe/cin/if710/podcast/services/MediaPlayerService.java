@@ -39,6 +39,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
                     player.start();
                 } else {
                     try {
+                        player.release();
                         player = new StatefulMediaPlayer();
                         player.setAudioAttributes(new AudioAttributes.Builder()
                                 .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -53,6 +54,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
                 }
 
             } else {
+
                 player = new StatefulMediaPlayer();
 
                 player.setAudioAttributes(new AudioAttributes.Builder()

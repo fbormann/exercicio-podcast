@@ -47,12 +47,14 @@ public class MainActivity extends Activity {
     private List<ItemFeed> feedItems;
     private XmlFeedAdapter adapter;
     private static final String Download_RSS = "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS";
+    boolean started = false;
+
+    public static String mediaPlayerState = "null";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         items = (ListView) findViewById(R.id.items);
         feedItems = new ArrayList<>();
@@ -61,6 +63,8 @@ public class MainActivity extends Activity {
         //atualizar o list view
         items.setAdapter(adapter);
         items.setTextFilterEnabled(true);
+
+
     }
 
     @Override
@@ -87,20 +91,30 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+
         receiver = new ReceiverRSSData();
         IntentFilter filter = new IntentFilter("br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS");
         registerReceiver(receiver, filter);
-        //check if there is internet connection available
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            new RSSPullService().startActionDownloadRSS(getApplicationContext(), RSS_FEED);
+
+        if (!started) {
+            //check if there is internet connection available
+            ConnectivityManager cm = (ConnectivityManager) getApplicationContext()
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) {
+                new RSSPullService().startActionDownloadRSS(getApplicationContext(), RSS_FEED);
+            } else {
+                //if there isn't, just download the data from database
+                Intent localIntent = new Intent(Download_RSS);
+                sendBroadcast(localIntent);
+            }
         } else {
             //if there isn't, just download the data from database
             Intent localIntent = new Intent(Download_RSS);
             sendBroadcast(localIntent);
         }
+
+        started = true;
     }
 
     @Override

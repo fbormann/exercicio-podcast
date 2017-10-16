@@ -1,6 +1,7 @@
 package br.ufpe.cin.if710.podcast.ui;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -12,6 +13,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,7 +54,8 @@ public class MainActivity extends Activity {
     private static final String Download_EPISODE_FINISHED =
             "br.ufpe.cin.if710.podcast.services.action.Download_EPISODE_FINISHED";
     private static final String Download_RSS = "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS";
-    boolean started = false;
+    public static boolean started = false;
+    public static boolean paused = false;
 
     public static String mediaPlayerState = "null";
 
@@ -121,6 +125,7 @@ public class MainActivity extends Activity {
         }
 
         started = true;
+        paused = false;
     }
 
     @Override
@@ -129,9 +134,13 @@ public class MainActivity extends Activity {
         XmlFeedAdapter adapter = (XmlFeedAdapter) items.getAdapter();
         adapter.clear();
         unregisterReceiver(receiver);
-
     }
 
+    @Override
+    protected  void onPause() {
+        super.onPause();
+        paused = true;
+    }
 
     private void updateListView(final List<ItemFeed> data) {
         //so it can modify the data even though I'm calling from a BroadCastReceiver
@@ -146,7 +155,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void updateListView(final String id, final String downloadPath) {
+     void updateListView(final String id, final String downloadPath) {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -167,6 +176,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            System.out.println(intent.getAction());
             if (intent.getAction().equals(Download_RSS_FINISHED)) {
                 ContentResolver resolver = context.getContentResolver();
                 Cursor cursor = resolver.query(PodcastProviderContract.EPISODE_LIST_URI, PodcastDBHelper.columns,
@@ -177,14 +187,15 @@ public class MainActivity extends Activity {
             }
 
             if (intent.getAction().equals(Download_EPISODE_FINISHED)) {
-                String downloadPath = intent.getStringExtra("downloadPath");
-                String id = intent.getStringExtra("id");
+                if (!paused) {
+                    String downloadPath = intent.getStringExtra("downloadPath");
+                    String id = intent.getStringExtra("id");
 
-                //update adapter/listView
-                updateListView(id, downloadPath);
-
+                    //update adapter/listView
+                    updateListView(id, downloadPath);
+                }
                 //create notification push that download is finished
-                //update list of items with new fileUri
+
 
             }
         }

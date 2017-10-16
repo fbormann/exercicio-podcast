@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Environment;
 import android.widget.Adapter;
 
@@ -24,9 +25,14 @@ import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
+import br.ufpe.cin.if710.podcast.resources.NotificationReceiver;
+import br.ufpe.cin.if710.podcast.ui.MainActivity;
 import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
 
+import static android.R.attr.filter;
+
 public class RSSPullService extends IntentService {
+    private NotificationReceiver receiver;
     private static final String Download_RSS = "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS";
     private static final String Download_EPISODE = "br.ufpe.cin.if710.podcast.services.action.EPISODE";
     private static final String Download_RSS_FINISHED =
@@ -47,6 +53,15 @@ public class RSSPullService extends IntentService {
         super("RSSPullService");
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        receiver = new NotificationReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Download_EPISODE_FINISHED);
+        this.registerReceiver(receiver, filter);
+    }
+
     public static void startActionDownloadRSS(Context context, String FeedLink) {
         Intent intent = new Intent(context, RSSPullService.class);
         intent.setAction(Download_RSS);
@@ -60,6 +75,12 @@ public class RSSPullService extends IntentService {
         intent.putExtra(EXTRA_URL, url);
         intent.putExtra(EXTRA_ID, id);
         context.startService(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.unregisterReceiver(receiver);
     }
 
     @Override

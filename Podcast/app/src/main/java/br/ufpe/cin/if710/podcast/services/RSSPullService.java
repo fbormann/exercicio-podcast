@@ -22,13 +22,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
+import br.ufpe.cin.if710.podcast.db.PodcastDatabase;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
+import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
 import br.ufpe.cin.if710.podcast.resources.NotificationReceiver;
 import br.ufpe.cin.if710.podcast.ui.MainActivity;
 import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
 
+import static android.R.attr.data;
 import static android.R.attr.filter;
 
 public class RSSPullService extends IntentService {
@@ -109,9 +112,14 @@ public class RSSPullService extends IntentService {
         }
 
         ContentResolver resolver = getContentResolver();
+        PodcastDatabase database = PodcastDatabase.getPodcastDatabase(getApplicationContext());
+        List<Podcast> podcasts = new ArrayList<>();
         for (int i = 0; i < itemList.size(); i++) {
             ContentValues values = new ContentValues();
             ItemFeed item = itemList.get(i);
+
+            Podcast podcast = new Podcast();
+
             values.put(PodcastDBHelper.columns[1], item.getTitle());
             values.put(PodcastDBHelper.columns[2], item.getPubDate());
             values.put(PodcastDBHelper.columns[3], item.getLink());
@@ -121,6 +129,7 @@ public class RSSPullService extends IntentService {
             if (resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values,
                     PodcastDBHelper.EPISODE_DOWNLOAD_LINK+"=?", new String[]{item.getDownloadLink()}) == 0) {
                 resolver.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
+                database.podcastDao().insert(podcast);
             }
         }
 

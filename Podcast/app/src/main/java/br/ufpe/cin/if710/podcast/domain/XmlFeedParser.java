@@ -21,7 +21,7 @@ public class XmlFeedParser {
 
     public static List<ItemFeed> readRss(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        List<ItemFeed> items = new ArrayList<ItemFeed>();
+        List<ItemFeed> items = new ArrayList<>();
         parser.require(XmlPullParser.START_TAG, null, "rss");
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -39,7 +39,7 @@ public class XmlFeedParser {
 
     public static List<ItemFeed> readChannel(XmlPullParser parser)
             throws IOException, XmlPullParserException {
-        List<ItemFeed> items = new ArrayList<ItemFeed>();
+        List<ItemFeed> items = new ArrayList<>();
         parser.require(XmlPullParser.START_TAG, null, "channel");
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
@@ -87,8 +87,7 @@ public class XmlFeedParser {
                 skip(parser);
             }
         }
-        ItemFeed result = new ItemFeed(title, link, pubDate, description, downloadLink);
-        return result;
+        return new ItemFeed(title, link, pubDate, description, downloadLink);
     }
 
     // Processa tags de forma parametrizada no feed.
@@ -114,9 +113,8 @@ public class XmlFeedParser {
     public static String readEnclosure(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, "enclosure");
-        String data = readURL(parser);
         //end tag não é necessário
-        return data;
+        return readURL(parser);
     }
 
     public static String readURL(XmlPullParser parser) {

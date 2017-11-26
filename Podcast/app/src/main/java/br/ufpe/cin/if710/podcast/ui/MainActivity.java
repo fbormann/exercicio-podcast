@@ -71,8 +71,6 @@ public class MainActivity extends Activity {
         //atualizar o list view
         items.setAdapter(adapter);
         items.setTextFilterEnabled(true);
-
-
     }
 
     @Override
@@ -201,7 +199,7 @@ public class MainActivity extends Activity {
         }
 
         private List<ItemFeed> readFromCursor(Cursor cursor) {
-            List<ItemFeed> items = new ArrayList<ItemFeed>();
+            List<ItemFeed> items = new ArrayList<>();
             if (cursor.moveToFirst()) {
                 do {
                     ItemFeed item = new ItemFeed(cursor.getString(1), cursor.getString(3), cursor.getString(2),

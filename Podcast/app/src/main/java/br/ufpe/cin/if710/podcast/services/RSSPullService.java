@@ -1,13 +1,10 @@
 package br.ufpe.cin.if710.podcast.services;
 
 import android.app.IntentService;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Environment;
-import android.widget.Adapter;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -18,32 +15,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
 import br.ufpe.cin.if710.podcast.db.PodcastDatabase;
-import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
 import br.ufpe.cin.if710.podcast.resources.NotificationReceiver;
-import br.ufpe.cin.if710.podcast.ui.MainActivity;
 import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
-
-import static android.R.attr.data;
-import static android.R.attr.filter;
 
 public class RSSPullService extends IntentService {
     private NotificationReceiver receiver;
-    private static final String Download_RSS = "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS";
-    private static final String Download_EPISODE = "br.ufpe.cin.if710.podcast.services.action.EPISODE";
+    private static final String Download_RSS =
+            "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS";
+    private static final String Download_EPISODE =
+            "br.ufpe.cin.if710.podcast.services.action.EPISODE";
     private static final String Download_RSS_FINISHED =
             "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS_FINISHED";
     private static final String Download_EPISODE_FINISHED =
             "br.ufpe.cin.if710.podcast.services.action.Download_EPISODE_FINISHED";
 
-    private static final String EXTRA_FEED_LINK = "br.ufpe.cin.if710.podcast.services.extra.FeedLink";
+    private static final String EXTRA_FEED_LINK =
+            "br.ufpe.cin.if710.podcast.services.extra.FeedLink";
     private static final String EXTRA_URL = "br.ufpe.cin.if710.podcast.services.extra.Url";
     private static final String EXTRA_ID = "br.ufpe.cin.if710.podcast.services.extra.EpisodeId";
 
@@ -111,26 +106,15 @@ public class RSSPullService extends IntentService {
             e.printStackTrace();
         }
 
-        ContentResolver resolver = getContentResolver();
         PodcastDatabase database = PodcastDatabase.getPodcastDatabase(getApplicationContext());
-        List<Podcast> podcasts = new ArrayList<>();
+
         for (int i = 0; i < itemList.size(); i++) {
-            ContentValues values = new ContentValues();
             ItemFeed item = itemList.get(i);
 
-            Podcast podcast = new Podcast();
-
-            values.put(PodcastDBHelper.columns[1], item.getTitle());
-            values.put(PodcastDBHelper.columns[2], item.getPubDate());
-            values.put(PodcastDBHelper.columns[3], item.getLink());
-            values.put(PodcastDBHelper.columns[4], item.getDescription());
-            values.put(PodcastDBHelper.columns[5], item.getDownloadLink());
-            values.put(PodcastDBHelper.columns[6], "");
-            if (resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values,
-                    PodcastDBHelper.EPISODE_DOWNLOAD_LINK+"=?", new String[]{item.getDownloadLink()}) == 0) {
-                resolver.insert(PodcastProviderContract.EPISODE_LIST_URI, values);
-                database.podcastDao().insert(podcast);
-            }
+            Podcast podcast = new Podcast(item.getId(), item.getTitle(),
+                    Date.valueOf(item.getPubDate()), item.getLink(), item.getDescription(),
+                    item.getDownloadLink(), item.getFileUri());
+            database.podcastDao().insert(podcast);
         }
 
         Intent localIntent = new Intent(Download_RSS_FINISHED);
@@ -175,11 +159,10 @@ public class RSSPullService extends IntentService {
             if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
             }
 
-            int fileLength = connection.getContentLength();
-
             // download the file
             input = connection.getInputStream();
-            File file = new File(getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_PODCASTS), fileName);
+            File file = new File(getApplicationContext()
+                    .getExternalFilesDir(Environment.DIRECTORY_PODCASTS), fileName);
             output = new FileOutputStream(file);
             downloadPath = file.getPath();
 
@@ -204,12 +187,7 @@ public class RSSPullService extends IntentService {
             if (connection != null)
                 connection.disconnect();
         }
-        ContentResolver resolver = getApplicationContext().getContentResolver();
-        ContentValues values = new ContentValues();
-        values.put(PodcastDBHelper.columns[0], id);
-        values.put(PodcastDBHelper.columns[6], downloadPath);
-        int modified = resolver.update(PodcastProviderContract.EPISODE_LIST_URI, values,
-                PodcastDBHelper._ID+"=?", new String[]{String.valueOf(id)});
+
         //this.adapter.updateItem(position, downloadPath);
         Intent localIntent = new Intent(Download_EPISODE_FINISHED);
         localIntent.putExtra("downloadPath", downloadPath);

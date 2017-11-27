@@ -1,7 +1,6 @@
 package br.ufpe.cin.if710.podcast.services;
 
 import android.app.Service;
-import android.content.ContentUris;
 import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;

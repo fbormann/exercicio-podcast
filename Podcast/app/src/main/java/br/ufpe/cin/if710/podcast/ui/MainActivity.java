@@ -1,43 +1,26 @@
 package br.ufpe.cin.if710.podcast.ui;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
-import br.ufpe.cin.if710.podcast.db.PodcastProvider;
 import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
-import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
 import br.ufpe.cin.if710.podcast.services.RSSPullService;
 import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
 
@@ -140,6 +123,7 @@ public class MainActivity extends Activity {
         paused = true;
     }
 
+    //TODO: modify to be a list of Podcast
     private void updateListView(final List<ItemFeed> data) {
         //so it can modify the data even though I'm calling from a BroadCastReceiver
         this.runOnUiThread(new Runnable() {
@@ -163,6 +147,7 @@ public class MainActivity extends Activity {
                         u.setFileUri(downloadPath);
                     }
                 }
+                //TODO: modify it so I don't have to call notifyDataSetChanged
                 adapter.notifyDataSetChanged();
             }
         });
@@ -176,11 +161,9 @@ public class MainActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             System.out.println(intent.getAction());
             if (intent.getAction().equals(Download_RSS_FINISHED)) {
-                ContentResolver resolver = context.getContentResolver();
-                Cursor cursor = resolver.query(PodcastProviderContract.EPISODE_LIST_URI, PodcastDBHelper.columns,
-                        null, null, null);
-                List<ItemFeed> items = readFromCursor(cursor);
-                cursor.close();
+
+                List<ItemFeed> items = null;
+                //modify to read all from DB
                 updateListView(items);
             }
 
@@ -193,8 +176,6 @@ public class MainActivity extends Activity {
                     updateListView(id, downloadPath);
                 }
                 //create notification push that download is finished
-
-
             }
         }
 

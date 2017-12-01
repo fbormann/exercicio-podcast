@@ -7,20 +7,23 @@ import java.util.Date;
 
 import br.ufpe.cin.if710.podcast.domain.PodcastModel;
 
-/**
- * Created by fbormann on 25/11/17.
- */
-
-@Entity
+@Entity(tableName = Podcast.TABLE_NAME)
 public class Podcast implements PodcastModel {
+    /** The name of the Cheese table. */
+    public static final String TABLE_NAME = "podcasts";
+
     @PrimaryKey
-    private int uId;
+    private int id;
     private String title;
-    private Date publishDate;
+    private String publishDate;
     private String link;
     private String description;
     private String downloadLink;
     private String episodeFileURI;
+
+    public int getId() {
+        return this.id;
+    }
 
     public String getTitle() {
         return this.title;
@@ -34,18 +37,62 @@ public class Podcast implements PodcastModel {
         return this.downloadLink;
     }
 
-    public Date getPublishDate() {
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setPublishDate(String publishDate) {
+        this.publishDate = publishDate;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setDownloadLink(String downloadLink) {
+        this.downloadLink = downloadLink;
+    }
+
+    public void setEpisodeFileURI(String episodeFileURI) {
+        this.episodeFileURI = episodeFileURI;
+    }
+
+    public String getPublishDate() {
         return this.publishDate;
     }
 
-    public Podcast(int id, String title, Date publishDate, String link, String description,
+    public String getFileUri() {
+        return this.episodeFileURI;
+    }
+
+    public void setFileUri(String fileUri) {
+        this.episodeFileURI = fileUri;
+    }
+
+    public Podcast(int id, String title, String publishDate, String link, String description,
                    String downloadLink, String episodeFileURI) {
-        this.uId = id;
+        this.id = id;
         this.title = title;
         this.publishDate = publishDate;
         this.link = link;
         this.description = description;
         this.downloadLink = downloadLink;
         this.episodeFileURI = episodeFileURI;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public String getEpisodeFileURI() {
+        return episodeFileURI;
     }
 }

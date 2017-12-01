@@ -1,44 +1,30 @@
 package br.ufpe.cin.if710.podcast.ui.adapter;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.List;
+
 import br.ufpe.cin.if710.podcast.R;
-import br.ufpe.cin.if710.podcast.db.PodcastDBHelper;
-import br.ufpe.cin.if710.podcast.db.PodcastProviderContract;
-import br.ufpe.cin.if710.podcast.domain.ItemFeed;
+import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 import br.ufpe.cin.if710.podcast.services.MediaPlayerService;
 import br.ufpe.cin.if710.podcast.services.RSSPullService;
 import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 import br.ufpe.cin.if710.podcast.ui.MainActivity;
 
-public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
+public class XmlFeedAdapter extends ArrayAdapter<Podcast> {
 
     int linkResource;
     private Context context;
     private static final String ACTION_PLAY = "br.ufpe.cin.if701.podcast.action.PLAY";
     private static final String ACTION_PAUSE = "br.ufpe.cin.if701.podcast.action.PAUSE";
 
-    public XmlFeedAdapter(Context context, int resource, List<ItemFeed> objects) {
+    public XmlFeedAdapter(Context context, int resource, List<Podcast> objects) {
         super(context, resource, objects);
         linkResource = resource;
         this.context = context;
@@ -48,6 +34,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
         getItem(position).setFileUri(fileUri);
         notifyDataSetChanged();
     }
+
 
     public XmlFeedAdapter getReference() {
         return this;
@@ -65,18 +52,6 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
      * Returns
      * A View corresponding to the data at the specified position.
      */
-
-
-	/*
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View rowView = inflater.inflate(R.layout.itemlista, parent, false);
-		TextView textView = (TextView) rowView.findViewById(R.id.item_title);
-		textView.setText(items.get(position).getTitle());
-	    return rowView;
-	}
-	/**/
 
     //http://developer.android.com/training/improving-layouts/smooth-scrolling.html#ViewHolder
     static class ViewHolder {
@@ -99,7 +74,7 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.item_title.setText(getItem(position).getTitle());
-        holder.item_date.setText(getItem(position).getPubDate());
+        holder.item_date.setText(getItem(position).getPublishDate().toString());
 
         holder.item_title.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,14 +82,15 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                 Intent openDetails = new Intent(context, EpisodeDetailActivity.class);
                 openDetails.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 openDetails.putExtra("feed_title", getItem(position).getTitle());
-                openDetails.putExtra("feed_date", getItem(position).getPubDate());
+                openDetails.putExtra("feed_date", getItem(position).getPublishDate());
                 openDetails.putExtra("feed_download_link", getItem(position).getDownloadLink());
                 openDetails.putExtra("feed_description", getItem(position).getDescription());
                 context.startActivity(openDetails);
             }
         });
 
-        if (!getItem(position).getFileUri().equals("")) {
+        if (getItem(position).getFileUri() != null)
+            if (!getItem(position).getFileUri().equals("")) {
             holder.actionButton.setText("tocar");
         }
 
@@ -125,9 +101,6 @@ public class XmlFeedAdapter extends ArrayAdapter<ItemFeed> {
                 Intent intent;
                 switch (btn.getText().toString()) {
                     case "baixar":
-                        /*new DownloadEpisodeTask(getReference(), position)
-                                .execute(getItem(position).getDownloadLink(),
-                                        String.valueOf(getItem(position).getId()));*/
                         new RSSPullService()
                                 .startActionDownloadEpisode(context, getItem(position).getDownloadLink(),
                                         String.valueOf(getItem(position).getId()));

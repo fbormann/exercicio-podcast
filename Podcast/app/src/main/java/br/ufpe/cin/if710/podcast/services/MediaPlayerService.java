@@ -83,7 +83,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             public void onCompletion(MediaPlayer mediaPlayer) {
                 mediaPlayer.release();
                 boolean deleted = file.delete();
-                System.out.println(deleted);
             }
         });
     }

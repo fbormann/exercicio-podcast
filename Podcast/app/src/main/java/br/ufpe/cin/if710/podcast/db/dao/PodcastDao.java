@@ -1,8 +1,10 @@
 package br.ufpe.cin.if710.podcast.db.dao;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
@@ -12,15 +14,15 @@ import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 
 @Dao
 public interface PodcastDao {
-    @Query("SELECT * FROM podcast")
-    LiveData<List<Podcast>> getAll();
+    @Query("SELECT * FROM " + Podcast.TABLE_NAME)
+    LiveData<List<Podcast>> getAllPodcasts();
 
     @Insert
     void insertAll(Podcast... podcast);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Podcast podcast);
 
     @Update
-    public void updatePodcast(Podcast podcast);
+    void updatePodcast(Podcast podcast);
 }

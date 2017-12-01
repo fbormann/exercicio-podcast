@@ -8,16 +8,18 @@ import android.content.Context;
 import br.ufpe.cin.if710.podcast.db.dao.PodcastDao;
 import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 
-@Database(entities = {Podcast.class}, version = 1)
+@Database(entities = {Podcast.class}, version = 2)
 public abstract class PodcastDatabase extends RoomDatabase {
-    private static PodcastDatabase instance;
+    public static PodcastDatabase instance;
 
     public abstract PodcastDao podcastDao();
 
     public static PodcastDatabase getPodcastDatabase(Context context) {
         if (instance == null) {
-            instance = Room.databaseBuilder(context.getApplicationContext(),
-                    PodcastDatabase.class, "podcast-database").build();
+            RoomDatabase.Builder<PodcastDatabase> builder = Room.databaseBuilder(context,
+                    PodcastDatabase.class, "podcast-database")
+                    .fallbackToDestructiveMigration();
+            return builder.build();
         }
         return instance;
     }

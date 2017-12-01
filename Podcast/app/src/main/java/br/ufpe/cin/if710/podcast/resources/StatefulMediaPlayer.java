@@ -9,8 +9,6 @@ import java.io.IOException;
 public class StatefulMediaPlayer extends MediaPlayer {
     private Uri dataSource;
 
-
-
     @Override
     public void setDataSource(Context context, Uri uri) throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         super.setDataSource(context, uri);

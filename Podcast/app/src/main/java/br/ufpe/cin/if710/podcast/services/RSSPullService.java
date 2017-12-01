@@ -15,11 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
 import br.ufpe.cin.if710.podcast.db.PodcastDatabase;
+import br.ufpe.cin.if710.podcast.db.dao.PodcastDao;
 import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
@@ -106,15 +106,16 @@ public class RSSPullService extends IntentService {
             e.printStackTrace();
         }
 
-        PodcastDatabase database = PodcastDatabase.getPodcastDatabase(getApplicationContext());
+        PodcastDao dao = PodcastDatabase.getPodcastDatabase(getApplicationContext())
+                .podcastDao();
 
         for (int i = 0; i < itemList.size(); i++) {
             ItemFeed item = itemList.get(i);
 
-            Podcast podcast = new Podcast(item.getId(), item.getTitle(),
-                    Date.valueOf(item.getPubDate()), item.getLink(), item.getDescription(),
+            Podcast podcast = new Podcast(i, item.getTitle(),
+                    item.getPubDate(), item.getLink(), item.getDescription(),
                     item.getDownloadLink(), item.getFileUri());
-            database.podcastDao().insert(podcast);
+            dao.insert(podcast);
         }
 
         Intent localIntent = new Intent(Download_RSS_FINISHED);
@@ -123,7 +124,7 @@ public class RSSPullService extends IntentService {
 
     private String getRssFeed(String feed) throws IOException {
         InputStream in = null;
-        String rssFeed = "";
+        String rssFeed;
         try {
             URL url = new URL(feed);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();

@@ -2,8 +2,9 @@ package br.ufpe.cin.if710.podcast.db.entities;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
-import java.util.Date;
+import java.util.UUID;
 
 import br.ufpe.cin.if710.podcast.domain.PodcastModel;
 
@@ -13,7 +14,8 @@ public class Podcast implements PodcastModel {
     public static final String TABLE_NAME = "podcasts";
 
     @PrimaryKey
-    private int id;
+    @NonNull
+    private String id;
     private String title;
     private String publishDate;
     private String link;
@@ -21,7 +23,7 @@ public class Podcast implements PodcastModel {
     private String downloadLink;
     private String episodeFileURI;
 
-    public int getId() {
+    public String getId() {
         return this.id;
     }
 
@@ -37,7 +39,7 @@ public class Podcast implements PodcastModel {
         return this.downloadLink;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -77,9 +79,9 @@ public class Podcast implements PodcastModel {
         this.episodeFileURI = fileUri;
     }
 
-    public Podcast(int id, String title, String publishDate, String link, String description,
+    public Podcast(String title, String publishDate, String link, String description,
                    String downloadLink, String episodeFileURI) {
-        this.id = id;
+        this.id = UUID.randomUUID().toString();
         this.title = title;
         this.publishDate = publishDate;
         this.link = link;

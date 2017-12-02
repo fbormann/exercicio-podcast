@@ -21,7 +21,6 @@ import java.util.List;
 import br.ufpe.cin.if710.podcast.db.PodcastDatabase;
 import br.ufpe.cin.if710.podcast.db.dao.PodcastDao;
 import br.ufpe.cin.if710.podcast.db.entities.Podcast;
-import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.domain.XmlFeedParser;
 import br.ufpe.cin.if710.podcast.resources.NotificationReceiver;
 import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
@@ -42,9 +41,6 @@ public class RSSPullService extends IntentService {
     private static final String EXTRA_URL = "br.ufpe.cin.if710.podcast.services.extra.Url";
     private static final String EXTRA_ID = "br.ufpe.cin.if710.podcast.services.extra.EpisodeId";
 
-    //optional fields
-    private XmlFeedAdapter adapter;
-    private int position;
     private String downloadPath;
 
     public RSSPullService() {
@@ -97,7 +93,7 @@ public class RSSPullService extends IntentService {
     }
 
     private void handleActionDownloadRSS(String FeedLink) {
-        List<ItemFeed> itemList = new ArrayList<>();
+        List<Podcast> itemList = new ArrayList<>();
         try {
             itemList = XmlFeedParser.parse(getRssFeed(FeedLink));
         } catch (IOException e) {
@@ -110,11 +106,7 @@ public class RSSPullService extends IntentService {
                 .podcastDao();
 
         for (int i = 0; i < itemList.size(); i++) {
-            ItemFeed item = itemList.get(i);
-
-            Podcast podcast = new Podcast(i, item.getTitle(),
-                    item.getPubDate(), item.getLink(), item.getDescription(),
-                    item.getDownloadLink(), item.getFileUri());
+            Podcast podcast = itemList.get(i);
             dao.insert(podcast);
         }
 

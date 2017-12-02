@@ -66,9 +66,9 @@ public class XmlFeedAdapter extends ArrayAdapter<Podcast> {
         if (convertView == null) {
             convertView = View.inflate(getContext(), linkResource, null);
             holder = new ViewHolder();
-            holder.item_title = (TextView) convertView.findViewById(R.id.item_title);
-            holder.item_date = (TextView) convertView.findViewById(R.id.item_date);
-            holder.actionButton = (Button) convertView.findViewById(R.id.item_action);
+            holder.item_title = convertView.findViewById(R.id.item_title);
+            holder.item_date = convertView.findViewById(R.id.item_date);
+            holder.actionButton = convertView.findViewById(R.id.item_action);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();

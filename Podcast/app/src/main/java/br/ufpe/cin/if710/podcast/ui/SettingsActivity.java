@@ -49,7 +49,6 @@ public class SettingsActivity extends Activity {
 
             // força chamada ao metodo de callback para exibir link atual
             mListener.onSharedPreferenceChanged(prefs, FEED_LINK);
-
         }
     }
 }

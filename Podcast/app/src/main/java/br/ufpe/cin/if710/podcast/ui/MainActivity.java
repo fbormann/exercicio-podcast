@@ -25,7 +25,6 @@ import java.util.List;
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 import br.ufpe.cin.if710.podcast.db.viewmodels.ListPodcastViewModel;
-import br.ufpe.cin.if710.podcast.domain.ItemFeed;
 import br.ufpe.cin.if710.podcast.services.RSSPullService;
 import br.ufpe.cin.if710.podcast.ui.adapter.XmlFeedAdapter;
 
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private final String RSS_FEED = "http://leopoldomt.com/if710/fronteirasdaciencia.xml";
     private ReceiverRSSData receiver;
     private ListView items;
-    private List<Podcast> podcasts;
     private XmlFeedAdapter adapter;
     private static final String Download_RSS_FINISHED =
             "br.ufpe.cin.if710.podcast.services.action.DOWNLOAD_RSS_FINISHED";
@@ -45,20 +43,20 @@ public class MainActivity extends AppCompatActivity {
     public static boolean started = false;
     public static boolean paused = false;
     public static String mediaPlayerState = "null";
-    private ListPodcastViewModel mModel;
     private LifecycleRegistry mLifecycleRegistry;
+    private ListPodcastViewModel mModel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mLifecycleRegistry = new LifecycleRegistry(this);
         mLifecycleRegistry.markState(Lifecycle.State.CREATED);
         setTheme(R.style.Theme_AppCompat_DayNight);
         setContentView(R.layout.activity_main);
         items = findViewById(R.id.items);
-        podcasts = new ArrayList<>();
-        adapter = new XmlFeedAdapter(getApplicationContext(), R.layout.itemlista, podcasts);
+        adapter = new XmlFeedAdapter(getApplicationContext(), R.layout.itemlista,
+                new ArrayList<Podcast>());
 
         //Room
         mModel = ViewModelProviders.of(this).get(ListPodcastViewModel.class);
@@ -166,34 +164,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Download_RSS_FINISHED)) {
-                List<Podcast> podcasts = mModel.getPodcasts(getApplication()).getValue();
             }
-
             if (intent.getAction().equals(Download_EPISODE_FINISHED)) {
                 if (!paused) {
                     String downloadPath = intent.getStringExtra("downloadPath");
                     String id = intent.getStringExtra("id");
-
                     adapter.updateItem(Integer.parseInt(id), downloadPath);
-                    //TODO: update downloadPath based on id
                 }
-                //create notification push that download is finished
             }
-        }
-
-        //TODO: modify to read data from a list of items
-        private List<ItemFeed> readFromCursor(Cursor cursor) {
-            List<ItemFeed> items = new ArrayList<>();
-            if (cursor.moveToFirst()) {
-                do {
-                    ItemFeed item = new ItemFeed(cursor.getString(1), cursor.getString(3), cursor.getString(2),
-                            cursor.getString(4), cursor.getString(5));
-                    item.setId(cursor.getInt(0));
-                    item.setFileUri(cursor.getString(6));
-                    items.add(item);
-                } while (cursor.moveToNext());
-            }
-            return items;
         }
     }
 }

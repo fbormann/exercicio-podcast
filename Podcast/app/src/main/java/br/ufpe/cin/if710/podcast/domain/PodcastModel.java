@@ -6,7 +6,7 @@ public interface PodcastModel {
     String getDownloadLink();
     String getPublishDate();
     String getFileUri();
-    int getId();
+    String getId();
 
     void setFileUri(String fileUri);
 }

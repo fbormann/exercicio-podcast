@@ -8,7 +8,7 @@ import android.content.Context;
 import br.ufpe.cin.if710.podcast.db.dao.PodcastDao;
 import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 
-@Database(entities = {Podcast.class}, version = 2)
+@Database(entities = {Podcast.class}, version = 3)
 public abstract class PodcastDatabase extends RoomDatabase {
     public static PodcastDatabase instance;
 

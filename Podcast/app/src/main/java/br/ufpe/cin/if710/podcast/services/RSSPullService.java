@@ -159,7 +159,7 @@ public class RSSPullService extends IntentService {
             output = new FileOutputStream(file);
             downloadPath = file.getPath();
 
-            byte data[] = new byte[4096];
+            byte data[] = new byte[8192];
             long total = 0;
             int count;
             while ((count = input.read(data)) != -1) {

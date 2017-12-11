@@ -16,7 +16,6 @@ import br.ufpe.cin.if710.podcast.services.MediaPlayerService;
 import br.ufpe.cin.if710.podcast.services.RSSPullService;
 import br.ufpe.cin.if710.podcast.ui.EpisodeDetailActivity;
 import br.ufpe.cin.if710.podcast.ui.MainActivity;
-
 public class XmlFeedAdapter extends ArrayAdapter<Podcast> {
 
     int linkResource;
@@ -36,9 +35,6 @@ public class XmlFeedAdapter extends ArrayAdapter<Podcast> {
     }
 
 
-    public XmlFeedAdapter getReference() {
-        return this;
-    }
     /**
      * public abstract View getView (int position, View convertView, ViewGroup parent)
      * <p>
@@ -58,6 +54,7 @@ public class XmlFeedAdapter extends ArrayAdapter<Podcast> {
         TextView item_title;
         TextView item_date;
         Button actionButton;
+        int position;
     }
 
     @Override
@@ -69,6 +66,7 @@ public class XmlFeedAdapter extends ArrayAdapter<Podcast> {
             holder.item_title = convertView.findViewById(R.id.item_title);
             holder.item_date = convertView.findViewById(R.id.item_date);
             holder.actionButton = convertView.findViewById(R.id.item_action);
+            holder.position = position;
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -103,9 +101,10 @@ public class XmlFeedAdapter extends ArrayAdapter<Podcast> {
                     case "baixar":
                         new RSSPullService()
                                 .startActionDownloadEpisode(context, getItem(position).getDownloadLink(),
-                                        String.valueOf(getItem(position).getId()));
+                                        String.valueOf(position));
                         btn.setText("tocar");
-                        notifyDataSetChanged();
+                        //notifyDataSetChanged();
+
                         break;
 
                     case "tocar":

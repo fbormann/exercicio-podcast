@@ -19,9 +19,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import com.frogermcs.androiddevmetrics.AndroidDevMetrics;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import br.ufpe.cin.if710.podcast.BuildConfig;
 import br.ufpe.cin.if710.podcast.R;
 import br.ufpe.cin.if710.podcast.db.entities.Podcast;
 import br.ufpe.cin.if710.podcast.db.viewmodels.ListPodcastViewModel;
@@ -46,10 +49,10 @@ public class MainActivity extends AppCompatActivity {
     private LifecycleRegistry mLifecycleRegistry;
     private ListPodcastViewModel mModel;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mLifecycleRegistry = new LifecycleRegistry(this);
         mLifecycleRegistry.markState(Lifecycle.State.CREATED);
         setTheme(R.style.Theme_AppCompat_DayNight);
@@ -80,6 +83,12 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         mLifecycleRegistry.markState(Lifecycle.State.RESUMED);
+        adapter.notifyDataSetChanged();
+
+        if (mModel.getPodcasts(getApplication()).getValue() != null) {
+            adapter.addAll(mModel.getPodcasts(getApplication()).getValue());
+        }
+
     }
 
     @Override

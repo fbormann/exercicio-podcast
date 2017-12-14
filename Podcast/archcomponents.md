@@ -12,13 +12,33 @@ Além disto, removi as classes auxiliares *PodcastDBHelper*, *PodcastProvider*, 
 
 Estas classes foram o domain.PodcastModel, entities.Podcast, viewmodels.ListPodcastViewModel, db.PodcastDatabase e dao.PodcastDao.
 
-# Implicações
+# Implementações e Análise
 
 Onde o DAO fornece uma interface para código e o PodcastDatabase a lógica para a criação do Dao e dos dados. Para a inserção de LiveData, defini o retornodo método "getAllPodcasts" no DAO para LiveData<>, o que garante que qualquer observer conectado a este objeto seja notificado caso haja uma mudança nos dados no DB, diminuindo a quantidade de código utilizado.
 
+PodcastDao.java:
+
+```Java
+@Dao
+public interface PodcastDao {
+    @Query("SELECT * FROM " + Podcast.TABLE_NAME)
+    LiveData<List<Podcast>> getAllPodcasts();
+
+    @Insert
+    void insertAll(Podcast... podcast);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(Podcast podcast);
+
+    @Update
+    void updatePodcast(Podcast podcast);
+}
+
+```
+
 Houve um problema relacionado ao lifecycle quando a activity é retornada (ou seja, onResume()), mas a orientação foi prontamente resolvido, observando o Android Profiler, basicamente há aumento de atividade na CPU até uns 60% por menos de 4s toda vez que a orientação é modificada mas não há atividade na rede dado que o LiveData já mantém os dados guardados e atualizados.
 
-Para resolver este problema, só foinecessário checar se o objeto LiveData existia e adicionar o observer novamente no onResume(), da seguinte maneira:
+Para resolver este problema, foi necessário checar se o objeto LiveData existia e adicionar o observer novamente no onResume(), da seguinte maneira:
 
 ```Java
 

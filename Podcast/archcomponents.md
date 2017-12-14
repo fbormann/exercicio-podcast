@@ -18,5 +18,13 @@ Onde o DAO fornece uma interface para código e o PodcastDatabase a lógica para
 
 Houve um problema relacionado ao lifecycle quando a activity é retornada (ou seja, onResume()), mas a orientação foi prontamente resolvido, observando o Android Profiler, basicamente há aumento de atividade na CPU até uns 60% por menos de 4s toda vez que a orientação é modificada mas não há atividade na rede dado que o LiveData já mantém os dados guardados e atualizados.
 
+Para resolver este problema, só foinecessário checar se o objeto LiveData existia e adicionar o observer novamente no onResume(), da seguinte maneira:
+
+```Java
+
+        if (mModel.getPodcasts(getApplication()).getValue() != null) {
+            adapter.addAll(mModel.getPodcasts(getApplication()).getValue());
+        }
+```
 
 

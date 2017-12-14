@@ -8,6 +8,20 @@ Ao utilizar android profiler para analisar a CPU, percebi que haviam picos de me
 
 Na primeira, em alguns casos, o uso de CPU alcançou 48%, o máximo que registrei. E na segunda, o pico foi bem menor, em torno de 13%.
 
+
+Exemplo do ciclo de CPU no Android Profiler:
+
+
+
+# início de download de episódio
+
+# início da aplicação
+
+![CPU1](/report_images/cpu_inicio.png)
+
+
+
+
 # Boas práticas
 
 Não consegui identificar boas práticas que diminuiram o uso de CPU no meu app.
